@@ -1,13 +1,12 @@
 package repository
 
 import (
-	"database/sql"
-
 	"cloud.google.com/go/firestore"
+	"gorm.io/gorm"
 )
 
 type PostgresRepository struct {
-	DB *sql.DB
+	DB *gorm.DB
 }
 
 type FirebaseRepository struct {
