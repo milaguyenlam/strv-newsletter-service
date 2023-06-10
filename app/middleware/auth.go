@@ -1,17 +1,23 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"strv.com/newsletter/repository"
+	"strv.com/newsletter/service"
 )
 
-func AuthMiddleware(ur *repository.UserRepository) gin.HandlerFunc {
+const UserContextKey = "user"
+
+func AuthMiddleware(us *service.UserService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 43243)
+		defer cancel()
+
 		// get JWT from the header
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -32,16 +38,16 @@ func AuthMiddleware(ur *repository.UserRepository) gin.HandlerFunc {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-
 			return []byte("secret"), nil
 		})
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			_, err := ur.GetByEmail(claims["email"].(string))
+			user, err := us.GetByEmail(ctx, claims["email"].(string))
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization token"})
 				return
 			}
+			c.Set("user", &user)
 			c.Next()
 		} else {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization token"})

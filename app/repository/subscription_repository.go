@@ -2,46 +2,44 @@ package repository
 
 import (
 	"context"
-	"log"
 
 	"cloud.google.com/go/firestore"
-	firebase "firebase.google.com/go"
-	"google.golang.org/api/option"
 	"strv.com/newsletter/model"
 )
 
 type SubscriptionRepository struct {
-	Client *firestore.Client
+	client *firestore.Client
 }
 
-func NewSubscriptionRepository() (*SubscriptionRepository, error) {
-	ctx := context.Background()
-	app, err := firebase.NewApp(ctx, nil, option.WithCredentialsFile("path/to/serviceAccountKey.json"))
+func NewSubscriptionRepository(client *firestore.Client) *SubscriptionRepository {
+	return &SubscriptionRepository{client: client}
+}
+
+func (sr *SubscriptionRepository) Add(ctx context.Context, subscription *model.Subscription) (string, error) {
+	docRef, _, err := sr.client.Collection("subscriptions").Add(ctx, subscription)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	client, err := app.Firestore(ctx)
+	return docRef.ID, nil
+}
+
+func (sr *SubscriptionRepository) Set(ctx context.Context, documentId string, subscription *model.Subscription) error {
+	_, err := sr.client.Collection("subscriptions").Doc(documentId).Set(ctx, subscription)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &SubscriptionRepository{Client: client}, nil
+	return nil
 }
 
-func (sr *SubscriptionRepository) Set(subscription *model.Subscription) (*firestore.WriteResult, error) {
-	ctx := context.Background()
-	documentId := subscription.Name + subscription.EditorEmail
-	return sr.Client.Collection("subscriptions").Doc(documentId).Set(ctx, subscription)
-}
-
-func (sr *SubscriptionRepository) Get(name string, editorEmail string) (*model.Subscription, error) {
-	ctx := context.Background()
+func (sr *SubscriptionRepository) Get(ctx context.Context, documentId string) (*model.Subscription, error) {
 	subscription := &model.Subscription{}
-	documentId := name + editorEmail
-	snapshot, err := sr.Client.Collection("subscriptions").Doc(documentId).Get(ctx)
+	snapshot, err := sr.client.Collection("subscriptions").Doc(documentId).Get(ctx)
 	if err != nil {
-		log.Println("")
 		return nil, err
 	}
-	snapshot.DataTo(subscription)
-	return subscription, err
+	err = snapshot.DataTo(subscription)
+	if err != nil {
+		return nil, err
+	}
+	return subscription, nil
 }

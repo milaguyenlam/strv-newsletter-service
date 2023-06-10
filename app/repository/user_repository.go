@@ -1,7 +1,8 @@
 package repository
 
 import (
-	"golang.org/x/crypto/bcrypt"
+	"context"
+
 	"gorm.io/gorm"
 	"strv.com/newsletter/model"
 )
@@ -12,25 +13,26 @@ type UserRepository struct {
 
 func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{
-		PostgresRepository{DB: db},
+		PostgresRepository{db: db},
 	}
 }
 
-func (ur *UserRepository) CreateUser(email string, password string) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func (ur *UserRepository) CreateUser(ctx context.Context, email string, password string) error {
+	user, err := model.NewUser(email, password)
 	if err != nil {
 		return err
 	}
-	user := &model.User{
-		Email:          email,
-		HashedPassword: hashedPassword,
+	err = ur.db.WithContext(ctx).Create(user).Error
+	if err != nil {
+		return err
 	}
-	return ur.DB.Create(user).Error
+	return nil
 }
 
-func (ur *UserRepository) GetByEmail(email string) (*model.User, error) {
+func (ur *UserRepository) GetByEmail(ctx context.Context, email string) (*model.User, error) {
 	user := &model.User{}
-	if err := ur.DB.Where("Email = ?", email).First(user).Error; err != nil {
+	err := ur.db.WithContext(ctx).Where("Email = ?", email).First(user).Error
+	if err != nil {
 		return nil, err
 	}
 	return user, nil

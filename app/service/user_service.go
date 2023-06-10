@@ -1,11 +1,11 @@
 package service
 
 import (
+	"context"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
+	"strv.com/newsletter/model"
 	"strv.com/newsletter/repository"
 )
 
@@ -19,13 +19,13 @@ func NewUserService(ur *repository.UserRepository) *UserService {
 	}
 }
 
-func (us *UserService) Login(c *gin.Context, email string, password string) (string, error) {
-	foundUser, err := us.UR.GetByEmail(email)
+func (us *UserService) Login(ctx context.Context, email string, password string) (string, error) {
+	foundUser, err := us.UR.GetByEmail(ctx, email)
 	if err != nil {
 		return "", err
 	}
 
-	err = bcrypt.CompareHashAndPassword(foundUser.HashedPassword, []byte(password))
+	err = foundUser.VerifyPassword(password)
 	if err != nil {
 		return "", err
 	}
@@ -43,10 +43,22 @@ func (us *UserService) Login(c *gin.Context, email string, password string) (str
 	return tokenString, nil
 }
 
-func (us *UserService) Register(c *gin.Context, email string, password string) (string, error) {
-	err := us.UR.CreateUser(email, password)
+func (us *UserService) Register(ctx context.Context, email string, password string) (string, error) {
+	err := us.UR.CreateUser(ctx, email, password)
 	if err != nil {
 		return "", err
 	}
-	return us.Login(c, email, password)
+	token, err := us.Login(ctx, email, password)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
+func (us *UserService) GetByEmail(ctx context.Context, email string) (*model.User, error) {
+	user, err := us.UR.GetByEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }

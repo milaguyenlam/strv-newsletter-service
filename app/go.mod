@@ -1,6 +1,6 @@
 module strv.com/newsletter
 
-go 1.18
+go 1.20
 
 require (
 	cloud.google.com/go v0.110.2 // indirect

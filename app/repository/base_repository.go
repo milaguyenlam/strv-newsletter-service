@@ -6,9 +6,9 @@ import (
 )
 
 type PostgresRepository struct {
-	DB *gorm.DB
+	db *gorm.DB
 }
 
 type FirebaseRepository struct {
-	Client *firestore.Client
+	client *firestore.Client
 }

@@ -1,30 +1,51 @@
 package config
 
 import (
+	"errors"
+
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	AppPort    string
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	JWTSecret  string
+	ServerPort              string
+	DatabaseDSN             string
+	AwsRegion               string
+	FirebaseCredentialsFile string
+	JWTSecret               string
+	SESSender               string
 }
 
-func LoadConfig() (config Config, err error) {
-	viper.AutomaticEnv() // It reads from environment variables
+func LoadConfig() (Config, error) {
+	viper.AutomaticEnv()
+	viper.SetEnvPrefix("APP")
 
-	config = Config{
-		AppPort:    viper.GetString("APP_PORT"),    // MYAPP_SERVER_PORT
-		DBHost:     viper.GetString("DB_HOST"),     // MYAPP_DB_HOST
-		DBPort:     viper.GetString("DB_PORT"),     // MYAPP_DB_PORT
-		DBUser:     viper.GetString("DB_USER"),     // MYAPP_DB_USER
-		DBPassword: viper.GetString("DB_PASSWORD"), // MYAPP_DB_PASSWORD
-		DBName:     viper.GetString("DB_NAME"),     // MYAPP_DB_NAME
-		JWTSecret:  viper.GetString("JWT_SECRET"),  // MYAPP_JWT_SECRET
+	var config Config
+
+	// Define all required keys
+	requiredKeys := []string{
+		"ServerPort",
+		"DatabaseDSN",
+		"AwsRegion",
+		"FirebaseCredentialsFile",
+		"JWTSecret",
+		"SESSender",
 	}
-	return
+
+	// Check all required keys
+	for _, key := range requiredKeys {
+		viper.BindEnv(key)
+
+		if !viper.IsSet(key) {
+			return Config{}, errors.New("required key " + key + " missing value")
+		}
+	}
+
+	config.ServerPort = viper.GetString("ServerPort")
+	config.DatabaseDSN = viper.GetString("DatabaseDSN")
+	config.AwsRegion = viper.GetString("AwsRegion")
+	config.FirebaseCredentialsFile = viper.GetString("FirebaseCredentialsFile")
+	config.JWTSecret = viper.GetString("JWTSecret")
+	config.SESSender = viper.GetString("SESSender")
+
+	return config, nil
 }
