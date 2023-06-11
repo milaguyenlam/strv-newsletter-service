@@ -1,0 +1,210 @@
+basePath: /api/v1
+definitions:
+  api.AuthenticationInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  api.CreateSubscriptionInput:
+    properties:
+      description:
+        type: string
+      subscriptionName:
+        type: string
+    type: object
+  model.Email:
+    properties:
+      body:
+        type: string
+      subject:
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact:
+    email: milaguyenlam@gmail.com
+    name: Nguyen Thanh Lam
+    url: https://github.com/milaguyenlam
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: STRV Newsletter Subscription API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user
+      operationId: login
+      parameters:
+      - description: login credentials
+        in: body
+        name: authInput
+        required: true
+        schema:
+          $ref: '#/definitions/api.AuthenticationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User Login
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user
+      operationId: register
+      parameters:
+      - description: registration details
+        in: body
+        name: authInput
+        required: true
+        schema:
+          $ref: '#/definitions/api.AuthenticationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User Registration
+  /subscription:
+    post:
+      consumes:
+      - application/json
+      description: Create a new subscription with the given name and description
+      operationId: create-subscription
+      parameters:
+      - description: subscription input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateSubscriptionInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: subscriptionId
+          schema:
+            type: string
+        "500":
+          description: Error message
+          schema:
+            type: string
+      summary: Create a new subscription
+  /subscription/{subscriptionID}/send:
+    post:
+      consumes:
+      - application/json
+      description: Send a newsletter to all subscribers
+      operationId: send-newsletter
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: subscriptionID
+        required: true
+        type: string
+      - description: Email details
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/model.Email'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message
+          schema:
+            type: string
+        "500":
+          description: Error message
+          schema:
+            type: string
+      summary: Send a newsletter
+  /subscription/{subscriptionID}/subscribe:
+    get:
+      description: Subscribe to a newsletter with a given subscription ID
+      operationId: subscribe-newsletter
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: subscriptionID
+        required: true
+        type: string
+      - description: Email to subscribe
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message
+          schema:
+            type: string
+        "500":
+          description: Error message
+          schema:
+            type: string
+      summary: Subscribe to a newsletter
+  /subscription/{subscriptionID}/unsubscribe:
+    get:
+      description: Unsubscribe from a newsletter with a given subscription ID
+      operationId: unsubscribe-newsletter
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: subscriptionID
+        required: true
+        type: string
+      - description: Email to unsubscribe
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Message
+          schema:
+            type: string
+        "500":
+          description: Error message
+          schema:
+            type: string
+      summary: Unsubscribe from a newsletter
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

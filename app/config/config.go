@@ -7,12 +7,11 @@ import (
 )
 
 type Config struct {
-	ServerPort              string
+	ServerPort              int
 	DatabaseDSN             string
 	AwsRegion               string
 	FirebaseCredentialsFile string
 	JWTSecret               string
-	SESSender               string
 }
 
 func LoadConfig() (Config, error) {
@@ -23,12 +22,11 @@ func LoadConfig() (Config, error) {
 
 	// Define all required keys
 	requiredKeys := []string{
-		"ServerPort",
-		"DatabaseDSN",
-		"AwsRegion",
-		"FirebaseCredentialsFile",
-		"JWTSecret",
-		"SESSender",
+		"SERVER_PORT",
+		"DATABASE_DSN",
+		"AWS_REGION",
+		"FIREBASE_CREDENTIALS_FILE",
+		"JWT_SECRET",
 	}
 
 	// Check all required keys
@@ -40,12 +38,11 @@ func LoadConfig() (Config, error) {
 		}
 	}
 
-	config.ServerPort = viper.GetString("ServerPort")
-	config.DatabaseDSN = viper.GetString("DatabaseDSN")
-	config.AwsRegion = viper.GetString("AwsRegion")
-	config.FirebaseCredentialsFile = viper.GetString("FirebaseCredentialsFile")
-	config.JWTSecret = viper.GetString("JWTSecret")
-	config.SESSender = viper.GetString("SESSender")
+	config.ServerPort = viper.GetInt("SERVER_PORT")
+	config.DatabaseDSN = viper.GetString("DATABASE_DSN")
+	config.AwsRegion = viper.GetString("AWS_REGION")
+	config.FirebaseCredentialsFile = viper.GetString("FIREBASE_CREDENTIALS_FILE")
+	config.JWTSecret = viper.GetString("JWT_SECRET")
 
 	return config, nil
 }

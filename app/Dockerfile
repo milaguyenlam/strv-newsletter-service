@@ -1,5 +1,5 @@
 # Start from a Debian based image with Go installed
-FROM golang:1.17-buster
+FROM golang:1.20
 
 # Create a directory for the app
 WORKDIR /go/src/app

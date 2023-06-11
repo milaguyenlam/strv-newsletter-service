@@ -2,11 +2,22 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"strv.com/newsletter/service"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"strv.com/newsletter/docs"
 )
 
-func SetupRoutes(app *gin.Engine, userService *service.UserService, subscriptionService *service.SubscriptionService) {
-	masterRouter := app.Group("/api/v1")
-	RegisterUserRouter(masterRouter, userService)
-	RegisterSubscriptionRouter(masterRouter, subscriptionService, userService)
+const BasePath = "api/v1"
+
+func SetupRoutes(app *gin.Engine, userController *UserController, subscriptionController *SubcriptionController) {
+	masterRouter := app.Group(BasePath)
+	setupSwagger(app)
+	userController.RegisterUserRouter(masterRouter)
+	subscriptionController.RegisterSubscriptionRouter(masterRouter)
+
+}
+
+func setupSwagger(app *gin.Engine) {
+	docs.SwaggerInfo.BasePath = BasePath
+	app.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

@@ -4,23 +4,27 @@ import (
 	"context"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/dgrijalva/jwt-go"
 	"strv.com/newsletter/model"
 	"strv.com/newsletter/repository"
 )
 
 type UserService struct {
-	UR *repository.UserRepository
+	ur  *repository.UserRepository
+	svc *ses.SES
 }
 
-func NewUserService(ur *repository.UserRepository) *UserService {
+func NewUserService(ur *repository.UserRepository, svc *ses.SES) *UserService {
 	return &UserService{
-		UR: ur,
+		ur:  ur,
+		svc: svc,
 	}
 }
 
 func (us *UserService) Login(ctx context.Context, email string, password string) (string, error) {
-	foundUser, err := us.UR.GetByEmail(ctx, email)
+	foundUser, err := us.ur.GetByEmail(ctx, email)
 	if err != nil {
 		return "", err
 	}
@@ -44,19 +48,29 @@ func (us *UserService) Login(ctx context.Context, email string, password string)
 }
 
 func (us *UserService) Register(ctx context.Context, email string, password string) (string, error) {
-	err := us.UR.CreateUser(ctx, email, password)
+	err := us.ur.CreateUser(ctx, email, password)
 	if err != nil {
 		return "", err
 	}
+
+	input := &ses.VerifyEmailAddressInput{
+		EmailAddress: aws.String(email),
+	}
+	_, err = us.svc.VerifyEmailAddress(input)
+	if err != nil {
+		return "", err
+	}
+
 	token, err := us.Login(ctx, email, password)
 	if err != nil {
 		return "", err
 	}
+
 	return token, nil
 }
 
 func (us *UserService) GetByEmail(ctx context.Context, email string) (*model.User, error) {
-	user, err := us.UR.GetByEmail(ctx, email)
+	user, err := us.ur.GetByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}

@@ -20,31 +20,52 @@ import (
 	"gorm.io/gorm"
 	"strv.com/newsletter/api"
 	"strv.com/newsletter/config"
+	"strv.com/newsletter/model"
 	"strv.com/newsletter/repository"
 	"strv.com/newsletter/service"
 )
 
+// @title           STRV Newsletter Subscription API
+// @version         1.0
+// @description     This is a sample server celler server.
+
+// @contact.name   Nguyen Thanh Lam
+// @contact.url    https://github.com/milaguyenlam
+// @contact.email  milaguyenlam@gmail.com
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.basic  BasicAuth
+
+// @externalDocs.description  OpenAPI
+// @externalDocs.url          https://swagger.io/resources/open-api/
+
 func main() {
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("Error loading configuration: %v", err)
+		log.Fatalf("Loading configuration: %v", err)
 	}
 
 	// Connect to Postgres
 	db, err := gorm.Open(postgres.Open(cfg.DatabaseDSN), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Error opening database: %v", err)
+		log.Fatalf("Opening database: %v", err)
 	}
+	db.AutoMigrate(&model.User{})
 
 	// Create a Firebase App
 	opt := option.WithCredentialsFile(cfg.FirebaseCredentialsFile)
 	firebaseApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
-		log.Fatalf("Error initializing Firebase app: %v", err)
+		log.Fatalf("Initializing Firebase app: %v", err)
 	}
 	firestoreClient, err := firebaseApp.Firestore(context.Background())
 	if err != nil {
-		log.Fatalf("Error getting Firestore client: %v", err)
+		log.Fatalf("Getting Firestore client: %v", err)
 	}
 
 	// Create an AWS session
@@ -52,19 +73,23 @@ func main() {
 		Region: aws.String(cfg.AwsRegion),
 	})
 	if err != nil {
-		log.Fatalf("Error creating AWS session: %v", err)
+		log.Fatalf("Creating AWS session: %v", err)
 	}
+	ses := ses.New(awsSession)
 
 	// Create repositories
 	userRepository := repository.NewUserRepository(db)
 	subscriptionRepository := repository.NewSubscriptionRepository(firestoreClient)
 
 	// Create services
-	userService := service.NewUserService(userRepository)
-	subscriptionService := service.NewSubscriptionService(subscriptionRepository, ses.New(awsSession))
+	userService := service.NewUserService(userRepository, ses)
+	subscriptionService := service.NewSubscriptionService(subscriptionRepository, ses)
+
+	userController := api.NewUserController(userService)
+	subscriptionController := api.NewSubscriptionController(subscriptionService, userService)
 
 	app := gin.Default()
-	api.SetupRoutes(app, userService, subscriptionService)
+	api.SetupRoutes(app, userController, subscriptionController)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.ServerPort),
