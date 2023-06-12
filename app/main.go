@@ -18,6 +18,7 @@ import (
 	"google.golang.org/api/option"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"strv.com/newsletter/api"
 	"strv.com/newsletter/config"
 	"strv.com/newsletter/model"
@@ -27,7 +28,7 @@ import (
 
 // @title           STRV Newsletter Subscription API
 // @version         1.0
-// @description     This is a sample server celler server.
+// @description     This is a newsletter subscription API service.
 
 // @contact.name   Nguyen Thanh Lam
 // @contact.url    https://github.com/milaguyenlam
@@ -37,9 +38,10 @@ import (
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host      localhost:8080
-// @BasePath  /api/v1
 
-// @securityDefinitions.basic  BasicAuth
+// @SecurityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
 
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
@@ -51,11 +53,14 @@ func main() {
 	}
 
 	// Connect to Postgres
-	db, err := gorm.Open(postgres.Open(cfg.DatabaseDSN), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(cfg.DatabaseDSN), &gorm.Config{Logger: logger.Default})
 	if err != nil {
 		log.Fatalf("Opening database: %v", err)
 	}
-	db.AutoMigrate(&model.User{})
+	err = db.AutoMigrate(&model.User{})
+	if err != nil {
+		log.Fatalf("Database migration failed: %v", err)
+	}
 
 	// Create a Firebase App
 	opt := option.WithCredentialsFile(cfg.FirebaseCredentialsFile)
@@ -98,7 +103,7 @@ func main() {
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Listen and serve: %s\n", err)
+			log.Fatalf("Listen and serve: %v", err)
 		}
 	}()
 

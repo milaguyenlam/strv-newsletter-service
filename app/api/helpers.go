@@ -1,21 +1,27 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"strv.com/newsletter/middleware"
 	"strv.com/newsletter/model"
 )
 
-func getCurrentUser(ctx *gin.Context) *model.User {
-	userValue, exists := ctx.Get(middleware.UserContextKey)
+type MessageResponse struct {
+	Message string
+}
+
+func getCurrentUser(c *gin.Context) (*model.User, error) {
+	userValue, exists := c.Get(middleware.UserContextKey)
 	if !exists {
-		return nil
+		return nil, fmt.Errorf("Getting current user from gin context failed: %v", c.Request.Header["Authorization"])
 	}
 	user, ok := userValue.(*model.User)
 	if !ok {
-		return nil
+		return nil, fmt.Errorf("Getting current user from gin context failed (type assertion failed): %v", c.Request.Header["Authorization"])
 	}
-	return user
+	return user, nil
 }
 
 func createMessageResponse(message string) gin.H {

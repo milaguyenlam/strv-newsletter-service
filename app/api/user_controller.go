@@ -13,6 +13,10 @@ type AuthenticationInput struct {
 	Password string `json:"password"`
 }
 
+type AuthenticationResponse struct {
+	Token string `json:"token"`
+}
+
 type UserController struct {
 	us *service.UserService
 }
@@ -36,12 +40,12 @@ func (uc *UserController) RegisterUserRouter(masterRouter *gin.RouterGroup) {
 // @ID login
 // @Accept  json
 // @Produce  json
-// @Param authInput body AuthenticationInput true "login credentials"
-// @Success 200 {object} map[string]string "token"
-// @Failure 401 {object} map[string]string "message"
-// @Router /login [post]
+// @Param authInput body AuthenticationInput true "Login credentials"
+// @Success 200 {object} AuthenticationResponse "Token"
+// @Failure 401 {object} MessageResponse "Message"
+// @Router /user/login [post]
 func (uc *UserController) Login(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3423234)
+	ctx, cancel := context.WithTimeout(context.Background(), TimeoutPeriod)
 	defer cancel()
 
 	var authInput AuthenticationInput
@@ -50,7 +54,8 @@ func (uc *UserController) Login(c *gin.Context) {
 	jwtToken, err := uc.us.Login(ctx, authInput.Email, authInput.Password)
 
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, createMessageResponse(err.Error()))
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": jwtToken})
 }
@@ -60,19 +65,20 @@ func (uc *UserController) Login(c *gin.Context) {
 // @ID register
 // @Accept  json
 // @Produce  json
-// @Param authInput body AuthenticationInput true "registration details"
-// @Success 200 {object} map[string]string "token"
-// @Failure 401 {object} map[string]string "message"
-// @Router /register [post]
+// @Param authInput body AuthenticationInput true "Registration details"
+// @Success 200 {object} AuthenticationResponse "Token"
+// @Failure 401 {object} MessageResponse "Message"
+// @Router /user/register [post]
 func (uc *UserController) Register(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3423234)
+	ctx, cancel := context.WithTimeout(context.Background(), TimeoutPeriod)
 	defer cancel()
 
 	var authInput AuthenticationInput
 	c.BindJSON(&authInput)
 	jwtToken, err := uc.us.Register(ctx, authInput.Email, authInput.Password)
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, createMessageResponse(err.Error()))
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": jwtToken})
 }

@@ -15,12 +15,13 @@ func NewSubscriptionRepository(client *firestore.Client) *SubscriptionRepository
 	return &SubscriptionRepository{client: client}
 }
 
-func (sr *SubscriptionRepository) Add(ctx context.Context, subscription *model.Subscription) (string, error) {
-	docRef, _, err := sr.client.Collection("subscriptions").Add(ctx, subscription)
+func (sr *SubscriptionRepository) Create(ctx context.Context, subscription *model.Subscription) (string, error) {
+	subscriptionID := subscription.GetID()
+	_, err := sr.client.Collection("subscriptions").Doc(subscriptionID).Create(ctx, subscription)
 	if err != nil {
 		return "", err
 	}
-	return docRef.ID, nil
+	return subscriptionID, nil
 }
 
 func (sr *SubscriptionRepository) Set(ctx context.Context, documentId string, subscription *model.Subscription) error {

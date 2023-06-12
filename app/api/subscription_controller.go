@@ -31,10 +31,10 @@ func NewSubscriptionController(ss *service.SubscriptionService, us *service.User
 func (sc *SubcriptionController) RegisterSubscriptionRouter(masterRouter *gin.RouterGroup) {
 	subscriptionRouter := masterRouter.Group("/subscription")
 	{
-		subscriptionRouter.POST("/create", middleware.AuthMiddleware(sc.us), sc.Create)
-		subscriptionRouter.POST("/:subscriptionID/send", middleware.AuthMiddleware(sc.us), sc.Send)
-		subscriptionRouter.GET(":subscriptionID/subscribe", sc.Subscribe)
-		subscriptionRouter.GET(":subscriptionID/unsubscribe", sc.Unsubscribe)
+		subscriptionRouter.POST("/create", middleware.AuthMiddleware(sc.us, TimeoutPeriod), sc.Create)
+		subscriptionRouter.POST("/:subscriptionID/send", middleware.AuthMiddleware(sc.us, TimeoutPeriod), sc.Send)
+		subscriptionRouter.GET("/:subscriptionID/subscribe", sc.Subscribe)
+		subscriptionRouter.GET("/:subscriptionID/unsubscribe", sc.Unsubscribe)
 	}
 }
 
@@ -42,24 +42,31 @@ func (sc *SubcriptionController) RegisterSubscriptionRouter(masterRouter *gin.Ro
 // @Summary Create a new subscription
 // @Description Create a new subscription with the given name and description
 // @ID create-subscription
+// @Security Bearer
 // @Accept  json
 // @Produce  json
 // @Param   input body CreateSubscriptionInput true "subscription input"
 // @Success 200 {object} string "subscriptionId"
 // @Failure 500 {object} string "Error message"
-// @Router /subscription [post]
+// @Router /subscription/create [post]
 func (sc *SubcriptionController) Create(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3423234)
+	ctx, cancel := context.WithTimeout(context.Background(), TimeoutPeriod)
 	defer cancel()
 
 	var createSubscriptionInput CreateSubscriptionInput
 	c.BindJSON(&createSubscriptionInput)
 
-	currentUser := getCurrentUser(c)
+	currentUser, err := getCurrentUser(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, createMessageResponse("Error while authenticating user"))
+		return
+	}
+
 	subscriptionID, err := sc.ss.CreateSubscription(ctx, createSubscriptionInput.Name, currentUser.Email, createSubscriptionInput.Description)
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Error while subscribing to the newsletter"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, createMessageResponse(fmt.Sprintf("Error while subscribing to the newsletter: %v", err)))
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"subscriptionId": subscriptionID})
@@ -69,6 +76,7 @@ func (sc *SubcriptionController) Create(c *gin.Context) {
 // @Summary Send a newsletter
 // @Description Send a newsletter to all subscribers
 // @ID send-newsletter
+// @Security Bearer
 // @Accept  json
 // @Produce  json
 // @Param subscriptionID path string true "Subscription ID"
@@ -77,7 +85,7 @@ func (sc *SubcriptionController) Create(c *gin.Context) {
 // @Failure 500 {object} string "Error message"
 // @Router /subscription/{subscriptionID}/send [post]
 func (sc *SubcriptionController) Send(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3423234)
+	ctx, cancel := context.WithTimeout(context.Background(), TimeoutPeriod)
 	defer cancel()
 
 	var email model.Email
@@ -95,7 +103,7 @@ func (sc *SubcriptionController) Send(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Subscription created successfully!"})
+	c.JSON(http.StatusOK, gin.H{"message": "Newsletter sent successfully!"})
 }
 
 // Subscribe to a newsletter
@@ -105,11 +113,11 @@ func (sc *SubcriptionController) Send(c *gin.Context) {
 // @Produce  json
 // @Param subscriptionID path string true "Subscription ID"
 // @Param email query string true "Email to subscribe"
-// @Success 200 {object} string "Message"
-// @Failure 500 {object} string "Error message"
+// @Success 200 {object} MessageResponse "Message"
+// @Failure 500 {object} MessageResponse "Error message"
 // @Router /subscription/{subscriptionID}/subscribe [get]
 func (sc *SubcriptionController) Subscribe(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 4324234)
+	ctx, cancel := context.WithTimeout(context.Background(), TimeoutPeriod)
 	defer cancel()
 
 	email, emailPresent := c.GetQuery("email")
@@ -134,11 +142,11 @@ func (sc *SubcriptionController) Subscribe(c *gin.Context) {
 // @Produce  json
 // @Param subscriptionID path string true "Subscription ID"
 // @Param email query string true "Email to unsubscribe"
-// @Success 200 {object} string "Message"
-// @Failure 500 {object} string "Error message"
+// @Success 200 {object} MessageResponse "Message"
+// @Failure 500 {object} MessageResponse "Error message"
 // @Router /subscription/{subscriptionID}/unsubscribe [get]
 func (sc *SubcriptionController) Unsubscribe(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 4324234)
+	ctx, cancel := context.WithTimeout(context.Background(), TimeoutPeriod)
 	defer cancel()
 
 	email, emailPresent := c.GetQuery("email")
@@ -153,5 +161,5 @@ func (sc *SubcriptionController) Unsubscribe(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, createMessageResponse(err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, createMessageResponse(fmt.Sprintf("%s successfully unsubscribed")))
+	c.JSON(http.StatusOK, createMessageResponse(fmt.Sprintf("%s successfully unsubscribed from %s", email, subscriptionID)))
 }

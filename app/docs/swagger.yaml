@@ -1,4 +1,3 @@
-basePath: /api/v1
 definitions:
   api.AuthenticationInput:
     properties:
@@ -7,11 +6,21 @@ definitions:
       password:
         type: string
     type: object
+  api.AuthenticationResponse:
+    properties:
+      token:
+        type: string
+    type: object
   api.CreateSubscriptionInput:
     properties:
       description:
         type: string
       subscriptionName:
+        type: string
+    type: object
+  api.MessageResponse:
+    properties:
+      message:
         type: string
     type: object
   model.Email:
@@ -30,96 +39,13 @@ info:
     email: milaguyenlam@gmail.com
     name: Nguyen Thanh Lam
     url: https://github.com/milaguyenlam
-  description: This is a sample server celler server.
+  description: This is a newsletter subscription API service.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: STRV Newsletter Subscription API
   version: "1.0"
 paths:
-  /login:
-    post:
-      consumes:
-      - application/json
-      description: Logs in a user
-      operationId: login
-      parameters:
-      - description: login credentials
-        in: body
-        name: authInput
-        required: true
-        schema:
-          $ref: '#/definitions/api.AuthenticationInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: token
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: message
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: User Login
-  /register:
-    post:
-      consumes:
-      - application/json
-      description: Registers a new user
-      operationId: register
-      parameters:
-      - description: registration details
-        in: body
-        name: authInput
-        required: true
-        schema:
-          $ref: '#/definitions/api.AuthenticationInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: token
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: message
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: User Registration
-  /subscription:
-    post:
-      consumes:
-      - application/json
-      description: Create a new subscription with the given name and description
-      operationId: create-subscription
-      parameters:
-      - description: subscription input
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/api.CreateSubscriptionInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: subscriptionId
-          schema:
-            type: string
-        "500":
-          description: Error message
-          schema:
-            type: string
-      summary: Create a new subscription
   /subscription/{subscriptionID}/send:
     post:
       consumes:
@@ -149,6 +75,8 @@ paths:
           description: Error message
           schema:
             type: string
+      security:
+      - Bearer: []
       summary: Send a newsletter
   /subscription/{subscriptionID}/subscribe:
     get:
@@ -171,11 +99,11 @@ paths:
         "200":
           description: Message
           schema:
-            type: string
+            $ref: '#/definitions/api.MessageResponse'
         "500":
           description: Error message
           schema:
-            type: string
+            $ref: '#/definitions/api.MessageResponse'
       summary: Subscribe to a newsletter
   /subscription/{subscriptionID}/unsubscribe:
     get:
@@ -198,13 +126,92 @@ paths:
         "200":
           description: Message
           schema:
+            $ref: '#/definitions/api.MessageResponse'
+        "500":
+          description: Error message
+          schema:
+            $ref: '#/definitions/api.MessageResponse'
+      summary: Unsubscribe from a newsletter
+  /subscription/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new subscription with the given name and description
+      operationId: create-subscription
+      parameters:
+      - description: subscription input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateSubscriptionInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: subscriptionId
+          schema:
             type: string
         "500":
           description: Error message
           schema:
             type: string
-      summary: Unsubscribe from a newsletter
+      security:
+      - Bearer: []
+      summary: Create a new subscription
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user
+      operationId: login
+      parameters:
+      - description: Login credentials
+        in: body
+        name: authInput
+        required: true
+        schema:
+          $ref: '#/definitions/api.AuthenticationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token
+          schema:
+            $ref: '#/definitions/api.AuthenticationResponse'
+        "401":
+          description: Message
+          schema:
+            $ref: '#/definitions/api.MessageResponse'
+      summary: User Login
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user
+      operationId: register
+      parameters:
+      - description: Registration details
+        in: body
+        name: authInput
+        required: true
+        schema:
+          $ref: '#/definitions/api.AuthenticationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token
+          schema:
+            $ref: '#/definitions/api.AuthenticationResponse'
+        "401":
+          description: Message
+          schema:
+            $ref: '#/definitions/api.MessageResponse'
+      summary: User Registration
 securityDefinitions:
-  BasicAuth:
-    type: basic
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

@@ -7,8 +7,8 @@ import (
 
 type User struct {
 	gorm.Model
-	Email          string `gorm:"type:varchar(100);unique_index"`
-	HashedPassword []byte `gorm:"type:varchar(100)"`
+	Email          string `gorm:"type:varchar(100);not null; unique"`
+	HashedPassword []byte `gorm:"type:varchar(100);not null;"`
 }
 
 func NewUser(email string, password string) (*User, error) {

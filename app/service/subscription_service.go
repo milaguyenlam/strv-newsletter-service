@@ -25,13 +25,8 @@ func NewSubscriptionService(sr *repository.SubscriptionRepository, svc *ses.SES)
 }
 
 func (ss *SubscriptionService) CreateSubscription(ctx context.Context, name string, editorEmail string, description string) (string, error) {
-	subsription := &model.Subscription{
-		Name:             name,
-		EditorEmail:      editorEmail,
-		Description:      description,
-		SubscribedEmails: nil,
-	}
-	subscriptionID, err := ss.sr.Add(ctx, subsription)
+	subscription := model.NewSubscription(name, editorEmail, description)
+	subscriptionID, err := ss.sr.Create(ctx, subscription)
 	return subscriptionID, err
 }
 

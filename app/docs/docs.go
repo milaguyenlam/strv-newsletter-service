@@ -24,96 +24,13 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/login": {
+        "/subscription/create": {
             "post": {
-                "description": "Logs in a user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "User Login",
-                "operationId": "login",
-                "parameters": [
+                "security": [
                     {
-                        "description": "login credentials",
-                        "name": "authInput",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.AuthenticationInput"
-                        }
+                        "Bearer": []
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "message",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/register": {
-            "post": {
-                "description": "Registers a new user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "User Registration",
-                "operationId": "register",
-                "parameters": [
-                    {
-                        "description": "registration details",
-                        "name": "authInput",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.AuthenticationInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "message",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/subscription": {
-            "post": {
                 "description": "Create a new subscription with the given name and description",
                 "consumes": [
                     "application/json"
@@ -152,6 +69,11 @@ const docTemplate = `{
         },
         "/subscription/{subscriptionID}/send": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Send a newsletter to all subscribers",
                 "consumes": [
                     "application/json"
@@ -223,13 +145,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Message",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.MessageResponse"
                         }
                     },
                     "500": {
                         "description": "Error message",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.MessageResponse"
                         }
                     }
                 }
@@ -263,13 +185,89 @@ const docTemplate = `{
                     "200": {
                         "description": "Message",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.MessageResponse"
                         }
                     },
                     "500": {
                         "description": "Error message",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.MessageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "description": "Logs in a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "User Login",
+                "operationId": "login",
+                "parameters": [
+                    {
+                        "description": "Login credentials",
+                        "name": "authInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.AuthenticationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token",
+                        "schema": {
+                            "$ref": "#/definitions/api.AuthenticationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Message",
+                        "schema": {
+                            "$ref": "#/definitions/api.MessageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/register": {
+            "post": {
+                "description": "Registers a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "User Registration",
+                "operationId": "register",
+                "parameters": [
+                    {
+                        "description": "Registration details",
+                        "name": "authInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.AuthenticationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token",
+                        "schema": {
+                            "$ref": "#/definitions/api.AuthenticationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Message",
+                        "schema": {
+                            "$ref": "#/definitions/api.MessageResponse"
                         }
                     }
                 }
@@ -288,6 +286,14 @@ const docTemplate = `{
                 }
             }
         },
+        "api.AuthenticationResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
         "api.CreateSubscriptionInput": {
             "type": "object",
             "properties": {
@@ -295,6 +301,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "subscriptionName": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.MessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }
@@ -312,8 +326,10 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "BasicAuth": {
-            "type": "basic"
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     },
     "externalDocs": {
@@ -326,10 +342,10 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "STRV Newsletter Subscription API",
-	Description:      "This is a sample server celler server.",
+	Description:      "This is a newsletter subscription API service.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

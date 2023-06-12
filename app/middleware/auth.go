@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -13,9 +14,9 @@ import (
 
 const UserContextKey = "user"
 
-func AuthMiddleware(us *service.UserService) gin.HandlerFunc {
+func AuthMiddleware(us *service.UserService, timeout time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ctx, cancel := context.WithTimeout(context.Background(), 43243)
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 
 		// get JWT from the header
@@ -36,7 +37,7 @@ func AuthMiddleware(us *service.UserService) gin.HandlerFunc {
 		token, _ := jwt.Parse(bearerToken[1], func(token *jwt.Token) (interface{}, error) {
 			// check signing method
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
 			return []byte("secret"), nil
 		})
@@ -47,7 +48,7 @@ func AuthMiddleware(us *service.UserService) gin.HandlerFunc {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization token"})
 				return
 			}
-			c.Set("user", &user)
+			c.Set(UserContextKey, user)
 			c.Next()
 		} else {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization token"})
