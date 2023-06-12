@@ -45,7 +45,7 @@ func (sc *SubcriptionController) RegisterSubscriptionRouter(masterRouter *gin.Ro
 // @Security Bearer
 // @Accept  json
 // @Produce  json
-// @Param   input body CreateSubscriptionInput true "subscription input"
+// @Param   input body CreateSubscriptionInput true "Subscription input"
 // @Success 200 {object} string "subscriptionId"
 // @Failure 500 {object} string "Error message"
 // @Router /subscription/create [post]
