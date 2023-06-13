@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	ServerPort   int    `mapstructure:"SERVER_PORT"`
+	Port         int    `mapstructure:"PORT"`
 	DatabaseURL  string `mapstructure:"DATABASE_URL"`
 	AwsRegion    string `mapstructure:"AWS_REGION"`
 	JWTSecret    string `mapstructure:"JWT_SECRET"`
@@ -15,7 +15,7 @@ type Config struct {
 }
 
 var requiredVariables = []string{
-	"SERVER_PORT", "DATABASE_URL", "AWS_REGION", "JWT_SECRET", "FIREBASE_JSON",
+	"PORT", "DATABASE_URL", "AWS_REGION", "JWT_SECRET", "FIREBASE_JSON",
 }
 
 func LoadConfig() (*Config, error) {

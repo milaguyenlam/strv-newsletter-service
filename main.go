@@ -108,7 +108,7 @@ func main() {
 	api.SetupRoutes(app, userController, subscriptionController)
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.ServerPort),
+		Addr:    fmt.Sprintf(":%d", cfg.Port),
 		Handler: app,
 	}
 
