@@ -9,6 +9,7 @@ import (
 	"strv.com/newsletter/middleware"
 	"strv.com/newsletter/model"
 	"strv.com/newsletter/service"
+	"strv.com/newsletter/utils"
 )
 
 // SubcriptionController is a struct that contains subscription services and user services.
@@ -55,16 +56,16 @@ func (sc *SubcriptionController) Create(c *gin.Context) {
 	var createSubscriptionInput model.CreateSubscriptionInput
 	c.BindJSON(&createSubscriptionInput)
 
-	currentUser, err := getCurrentUser(c)
+	currentUser, err := utils.GetCurrentUser(c)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, model.NewMessageResponse("Error while authenticating user"))
+		utils.AbortWithStatusJSONFromError(c, err)
 		return
 	}
 
 	subscriptionID, err := sc.ss.CreateSubscription(ctx, createSubscriptionInput.Name, currentUser.Email, createSubscriptionInput.Description)
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, model.NewMessageResponse(fmt.Sprintf("Error while creating newsletter subscription: %v", err)))
+		utils.AbortWithStatusJSONFromError(c, err)
 		return
 	}
 
@@ -98,7 +99,7 @@ func (sc *SubcriptionController) Send(c *gin.Context) {
 
 	err := sc.ss.SendNewsletterEmail(ctx, subcriptionID, &email)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, model.NewMessageResponse(fmt.Sprintf("Sending newsletter failed: %s", err.Error())))
+		utils.AbortWithStatusJSONFromError(c, err)
 		return
 	}
 
@@ -125,10 +126,11 @@ func (sc *SubcriptionController) Subscribe(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, model.NewMessageResponse("Invalid request - email and subscription ID has to be specified."))
 		return
 	}
+	unsubscribeLink := utils.CreateUnsubscribeLink(c.Request)
 
-	err := sc.ss.Subscribe(ctx, subscriptionID, email, "")
+	err := sc.ss.Subscribe(ctx, subscriptionID, email, unsubscribeLink)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.NewMessageResponse(fmt.Sprintf("Subscription failed: %v", err.Error())))
+		utils.AbortWithStatusJSONFromError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, model.NewMessageResponse(fmt.Sprintf("%s successfully subscribed to %s", email, subscriptionID)))
@@ -157,7 +159,7 @@ func (sc *SubcriptionController) Unsubscribe(c *gin.Context) {
 
 	err := sc.ss.Unsubscribe(ctx, subscriptionID, email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.NewMessageResponse(fmt.Sprintf("Unsubscription failed: %v", err.Error())))
+		utils.AbortWithStatusJSONFromError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, model.NewMessageResponse(fmt.Sprintf("%s successfully unsubscribed from %s", email, subscriptionID)))

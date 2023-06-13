@@ -2,12 +2,12 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"strv.com/newsletter/model"
 	"strv.com/newsletter/service"
+	"strv.com/newsletter/utils"
 )
 
 // UserController is a struct that contains user service.
@@ -51,10 +51,10 @@ func (uc *UserController) Login(c *gin.Context) {
 	jwtToken, err := uc.us.Login(ctx, authInput.Email, authInput.Password)
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, model.NewMessageResponse(err.Error()))
+		utils.AbortWithStatusJSONFromError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"token": jwtToken})
+	c.JSON(http.StatusOK, model.NewAuthenticationResponse(jwtToken))
 }
 
 // @Summary User Registration
@@ -74,8 +74,8 @@ func (uc *UserController) Register(c *gin.Context) {
 	c.BindJSON(&authInput)
 	jwtToken, err := uc.us.Register(ctx, authInput.Email, authInput.Password)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, model.NewMessageResponse(fmt.Sprintf("Registration failed: %v", err.Error())))
+		utils.AbortWithStatusJSONFromError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"token": jwtToken})
+	c.JSON(http.StatusOK, model.NewAuthenticationResponse(jwtToken))
 }

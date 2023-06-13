@@ -53,7 +53,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Subscription ID",
+                        "description": "Subscription ID - composed of its name and the editor's email divided by underscore.",
                         "schema": {
                             "$ref": "#/definitions/model.MessageResponse"
                         }

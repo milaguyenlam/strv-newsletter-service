@@ -10,9 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"strv.com/newsletter/model"
 	"strv.com/newsletter/service"
+	"strv.com/newsletter/utils"
 )
-
-const UserContextKey = "user"
 
 func CreateAuthMiddleware(us *service.UserService, timeout time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -22,7 +21,7 @@ func CreateAuthMiddleware(us *service.UserService, timeout time.Duration) gin.Ha
 		// get JWT from the header
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusBadRequest, model.NewMessageResponse("Missing authorization token."))
+			c.AbortWithStatusJSON(http.StatusBadRequest, model.NewMessageResponse("Missing authorization token"))
 			return
 		}
 
@@ -36,11 +35,11 @@ func CreateAuthMiddleware(us *service.UserService, timeout time.Duration) gin.Ha
 		// validate JWT
 		user, err := us.VerifyToken(ctx, bearerToken[1])
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, model.NewMessageResponse("Invalid authorization token - verification failed."))
+			utils.AbortWithStatusJSONFromError(c, err)
 			return
 		}
 
-		c.Set(UserContextKey, user)
+		c.Set(service.UserContextKey, user)
 		c.Next()
 	}
 }
