@@ -1,7 +1,6 @@
 # STRV subscription Service
 
 The STRV subscription Service is a service designed to allow users to create and send subscriptions. It is primarily built using Go and leverages Firebase's Firestore and PostgreSQL for database management and AWS Simple Email Service (SES) for sending emails.
-
 ## Project Structure
 
 The project is organized in the following manner:
@@ -16,6 +15,8 @@ The project is organized in the following manner:
 - `utils` : Contains helper functions.
 
 ## Endpoints
+
+- OpenAPI documentation: https://polar-savannah-16447.herokuapp.com/docs/index.html
 
 ### User
 
@@ -55,12 +56,7 @@ To build and run the project, you can use the provided Makefile commands:
 
 - `make build` : Builds the Go app.
 - `make test` : Runs the tests. test.env (inside test/ folder) file has to be configured for manual live testing to work properly.
-  - HOST_URL=
-  - TEST_USER_EMAIL=
-  - TEST_USER_PASSWORD=
-  - TEST_SUBSCRIBED_EMAIL=
-  - TEST_SUBSCRIPTION_NAME=
-  - TEST_SUBSCRIPTION_DESC=
+  - `HOST_URL`,`TEST_USER_EMAIL`,`TEST_USER_PASSWORD`,`TEST_SUBSCRIBED_EMAIL`,`TEST_SUBSCRIPTION_NAME`,`TEST_SUBSCRIPTION_DESC`
 - `make run` : Runs the app.
 - `make docker-build` : Builds a Docker image for the app.
 - `make docker-run` : Runs the Docker container.
@@ -73,11 +69,3 @@ You can also build and run the whole project (including local PostgreSQL instanc
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
-
-## License
-
-This project is licensed under the terms of the MIT license.
-
-## Contact
-
-For more information, please contact the project owner.
