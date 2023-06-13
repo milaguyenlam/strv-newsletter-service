@@ -45,7 +45,7 @@ func (sc *SubcriptionController) RegisterSubscriptionRouter(masterRouter *gin.Ro
 // @Accept  json
 // @Produce  json
 // @Param   input body model.CreateSubscriptionInput true "Subscription input"
-// @Success 200 {object} model.MessageResponse "Subscription ID"
+// @Success 200 {object} model.MessageResponse "Subscription ID - composed of its name and the editor's email divided by underscore."
 // @Failure 500 {object} model.MessageResponse "Error message"
 // @Router /subscription/create [post]
 func (sc *SubcriptionController) Create(c *gin.Context) {
@@ -64,7 +64,7 @@ func (sc *SubcriptionController) Create(c *gin.Context) {
 	subscriptionID, err := sc.ss.CreateSubscription(ctx, createSubscriptionInput.Name, currentUser.Email, createSubscriptionInput.Description)
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, model.NewMessageResponse(fmt.Sprintf("Error while subscribing to the newsletter: %v", err)))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, model.NewMessageResponse(fmt.Sprintf("Error while creating newsletter subscription: %v", err)))
 		return
 	}
 

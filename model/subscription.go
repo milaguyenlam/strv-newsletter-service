@@ -47,5 +47,5 @@ func (s *Subscription) GetSubscribedEmailsAsSlice() []*string {
 
 // GetID is a method that returns the unique identifier for a subscription, composed of its name and the editor's email.
 func (s *Subscription) GetID() string {
-	return s.Name + s.EditorEmail
+	return s.Name + "_" + s.EditorEmail
 }

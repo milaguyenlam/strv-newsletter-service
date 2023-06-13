@@ -28,7 +28,7 @@ func CreateAuthMiddleware(us *service.UserService, timeout time.Duration) gin.Ha
 
 		// validate JWT format
 		bearerToken := strings.Split(authHeader, " ")
-		if len(bearerToken) != 2 || bearerToken[0] == "Bearer" {
+		if len(bearerToken) != 2 || bearerToken[0] != "Bearer" {
 			c.AbortWithStatusJSON(http.StatusBadRequest, model.NewMessageResponse(fmt.Sprintf("Invalid authorization token format: %s", authHeader)))
 			return
 		}

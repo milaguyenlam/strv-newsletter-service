@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -55,7 +56,7 @@ func main() {
 	}
 
 	// Connect to Postgres
-	db, err := gorm.Open(postgres.Open(cfg.DatabaseDSN), &gorm.Config{Logger: logger.Default})
+	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{Logger: logger.Default})
 	if err != nil {
 		log.Fatalf("Opening database: %v", err)
 	}
@@ -66,11 +67,17 @@ func main() {
 	}
 
 	// Create a Firebase App
-	opt := option.WithCredentialsJSON(cfg.FirebaseJSON)
+	decodedFirebaseJSON, err := base64.StdEncoding.DecodeString(cfg.FirebaseJSON)
+	if err != nil {
+		log.Fatalf("Decoding Firebase JSON configuration: %v", err)
+	}
+
+	opt := option.WithCredentialsJSON(decodedFirebaseJSON)
 	firebaseApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		log.Fatalf("Initializing Firebase app: %v", err)
 	}
+
 	firestoreClient, err := firebaseApp.Firestore(context.Background())
 	if err != nil {
 		log.Fatalf("Getting Firestore client: %v", err)
