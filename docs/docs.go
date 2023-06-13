@@ -31,7 +31,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Create a new subscription with the given name and description",
+                "description": "Create a new subscription with the given name and description. Note that subscription ID is a concatenation of its name and editor's email divided by an underscore.",
                 "consumes": [
                     "application/json"
                 ],
@@ -287,7 +287,15 @@ const docTemplate = `{
             }
         },
         "model.AuthenticationResponse": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
         },
         "model.CreateSubscriptionInput": {
             "type": "object",

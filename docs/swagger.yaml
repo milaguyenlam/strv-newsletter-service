@@ -7,6 +7,11 @@ definitions:
         type: string
     type: object
   model.AuthenticationResponse:
+    properties:
+      message:
+        type: string
+      token:
+        type: string
     type: object
   model.CreateSubscriptionInput:
     properties:
@@ -134,7 +139,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new subscription with the given name and description
+      description: Create a new subscription with the given name and description.
+        Note that subscription ID is a concatenation of its name and editor's email
+        divided by an underscore.
       operationId: create-subscription
       parameters:
       - description: Subscription input

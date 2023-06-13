@@ -13,6 +13,7 @@ The project is organized in the following manner:
 - `model`: Contains the data models.
 - `repository`: Contains the code to interact with the database.
 - `service`: Contains business logic of the service.
+- `utils` : Contains helper functions.
 
 ## Endpoints
 
@@ -32,11 +33,11 @@ The project is organized in the following manner:
 
 Here are the descriptions for each of the environment variables used in this project:
 
-- `SERVER_PORT`: This variable sets the port number on which the application server runs. For example, if you set `SERVER_PORT=8080`, the application will run on port 8080.
+- `PORT`: This variable sets the port number on which the application server runs. For example, if you set `SERVER_PORT=8080`, the application will run on port 8080.
 
-- `DATABASE_DSN`: This variable is the Data Source Name for the database. It provides the information needed to connect to the database. In this case, it appears to be configured for a PostgreSQL database and contains information such as the host (where the database is located), the user (the username used to connect to the database), the password (the password used to authenticate the user), the dbname (the name of the database to connect to), and sslmode (whether or not to use SSL).
+- `DATABASE_URL`: This variable is the Data Source Name for the database. It provides the information needed to connect to the database. In this case, it appears to be configured for a PostgreSQL database and contains information such as the host (where the database is located), the user (the username used to connect to the database), the password (the password used to authenticate the user), the dbname (the name of the database to connect to), and sslmode (whether or not to use SSL).
 
-- `FIREBASE_JSON`: This variable contains JSON that includes your Firebase project's credentials that are needed to authenticate with Firebase.
+- `FIREBASE_JSON`: This variable contains JSON encoded in BASE64 that includes your Firebase project's credentials that are needed to authenticate with Firebase.
 
 - `AWS_REGION`: This variable sets the AWS region that your application will interact with. For example, if your AWS resources (like your SES email service) are located in the North Europe region, you would set `AWS_REGION=eu-north-1`.
 
@@ -44,7 +45,7 @@ Here are the descriptions for each of the environment variables used in this pro
 
 - `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`: These variables are your AWS credentials. They are used to authenticate your application's requests to AWS. These should be kept secret.
 
-- `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB`: These variables are used to configure the PostgreSQL database. `POSTGRES_USER` is the username used to connect to the database, `POSTGRES_PASSWORD` is the password used to authenticate the user, and `POSTGRES_DB` is the name of the database to connect to.
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB`: These variables are used to configure the PostgreSQL database. `POSTGRES_USER` is the username used to connect to the database, `POSTGRES_PASSWORD` is the password used to authenticate the user, and `POSTGRES_DB` is the name of the database to connect to (relevant for docker-compose deployment).
 
 These environment variables can be set in a `.env` file in your project root or directly in your environment, depending on how you choose to run the application.
 
@@ -53,7 +54,13 @@ These environment variables can be set in a `.env` file in your project root or 
 To build and run the project, you can use the provided Makefile commands:
 
 - `make build` : Builds the Go app.
-- `make test` : Runs the tests.
+- `make test` : Runs the tests. test.env (inside test/ folder) file has to be configured for manual live testing to work properly.
+  - HOST_URL=
+  - TEST_USER_EMAIL=
+  - TEST_USER_PASSWORD=
+  - TEST_SUBSCRIBED_EMAIL=
+  - TEST_SUBSCRIPTION_NAME=
+  - TEST_SUBSCRIPTION_DESC=
 - `make run` : Runs the app.
 - `make docker-build` : Builds a Docker image for the app.
 - `make docker-run` : Runs the Docker container.

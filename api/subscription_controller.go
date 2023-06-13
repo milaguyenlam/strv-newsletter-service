@@ -40,7 +40,7 @@ func (sc *SubcriptionController) RegisterSubscriptionRouter(masterRouter *gin.Ro
 
 // Create a new subscription
 // @Summary Create a new subscription
-// @Description Create a new subscription with the given name and description
+// @Description Create a new subscription with the given name and description. Note that subscription ID is a concatenation of its name and editor's email divided by an underscore.
 // @ID create-subscription
 // @Security Bearer
 // @Accept  json
