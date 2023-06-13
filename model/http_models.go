@@ -9,12 +9,14 @@ func NewMessageResponse(message string) MessageResponse {
 }
 
 type AuthenticationResponse struct {
-	Token string `json:"token"`
+	Token   string `json:"token"`
+	Message string `json:"message"`
 }
 
-func NewAuthenticationResponse(token string) AuthenticationResponse {
+func NewAuthenticationResponse(token, message string) AuthenticationResponse {
 	return AuthenticationResponse{
-		Token: token,
+		Token:   token,
+		Message: message,
 	}
 }
 

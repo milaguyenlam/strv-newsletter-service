@@ -74,7 +74,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Send a newsletter to all subscribers",
+                "description": "Send a newsletter email to all subscribers",
                 "consumes": [
                     "application/json"
                 ],
@@ -119,7 +119,7 @@ const docTemplate = `{
         },
         "/subscription/{subscriptionID}/subscribe": {
             "get": {
-                "description": "Subscribe to a newsletter with a given subscription ID",
+                "description": "Subscribe to a newsletter with a given subscription ID (confirmation email with unsubscribe link will be sent to newly subscribed user)",
                 "produces": [
                     "application/json"
                 ],
@@ -237,7 +237,7 @@ const docTemplate = `{
         },
         "/user/register": {
             "post": {
-                "description": "Registers a new user",
+                "description": "Registers a new user (user email has to be verified by AWS SES to be able to send newsletter emails)",
                 "consumes": [
                     "application/json"
                 ],
@@ -287,12 +287,7 @@ const docTemplate = `{
             }
         },
         "model.AuthenticationResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "model.CreateSubscriptionInput": {
             "type": "object",

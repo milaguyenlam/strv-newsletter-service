@@ -12,10 +12,11 @@ type Config struct {
 	AwsRegion    string `mapstructure:"AWS_REGION"`
 	JWTSecret    string `mapstructure:"JWT_SECRET"`
 	FirebaseJSON string `mapstructure:"FIREBASE_JSON"`
+	Host         string `mapstructure:"HOST_URL"`
 }
 
 var requiredVariables = []string{
-	"PORT", "DATABASE_URL", "AWS_REGION", "JWT_SECRET", "FIREBASE_JSON",
+	"PORT", "DATABASE_URL", "AWS_REGION", "JWT_SECRET", "FIREBASE_JSON", "HOST_URL",
 }
 
 func LoadConfig() (*Config, error) {

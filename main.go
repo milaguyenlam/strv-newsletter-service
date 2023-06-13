@@ -22,6 +22,7 @@ import (
 	"gorm.io/gorm/logger"
 	"strv.com/newsletter/api"
 	"strv.com/newsletter/config"
+	"strv.com/newsletter/docs"
 	"strv.com/newsletter/model"
 	"strv.com/newsletter/repository"
 	"strv.com/newsletter/service"
@@ -54,6 +55,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Loading configuration: %v", err)
 	}
+
+	docs.SwaggerInfo.BasePath = api.BasePath
+	docs.SwaggerInfo.Host = cfg.Host
 
 	// Connect to Postgres
 	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{Logger: logger.Default})

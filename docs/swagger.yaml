@@ -7,9 +7,6 @@ definitions:
         type: string
     type: object
   model.AuthenticationResponse:
-    properties:
-      token:
-        type: string
     type: object
   model.CreateSubscriptionInput:
     properties:
@@ -50,7 +47,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Send a newsletter to all subscribers
+      description: Send a newsletter email to all subscribers
       operationId: send-newsletter
       parameters:
       - description: Subscription ID
@@ -80,7 +77,8 @@ paths:
       summary: Send a newsletter
   /subscription/{subscriptionID}/subscribe:
     get:
-      description: Subscribe to a newsletter with a given subscription ID
+      description: Subscribe to a newsletter with a given subscription ID (confirmation
+        email with unsubscribe link will be sent to newly subscribed user)
       operationId: subscribe-newsletter
       parameters:
       - description: Subscription ID
@@ -189,7 +187,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Registers a new user
+      description: Registers a new user (user email has to be verified by AWS SES
+        to be able to send newsletter emails)
       operationId: register
       parameters:
       - description: Registration details

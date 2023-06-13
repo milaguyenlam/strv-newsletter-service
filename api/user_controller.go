@@ -54,11 +54,11 @@ func (uc *UserController) Login(c *gin.Context) {
 		utils.AbortWithStatusJSONFromError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, model.NewAuthenticationResponse(jwtToken))
+	c.JSON(http.StatusOK, model.NewAuthenticationResponse(jwtToken, "User successfully logged in"))
 }
 
 // @Summary User Registration
-// @Description Registers a new user
+// @Description Registers a new user (user email has to be verified by AWS SES to be able to send newsletter emails)
 // @ID register
 // @Accept  json
 // @Produce  json
@@ -77,5 +77,5 @@ func (uc *UserController) Register(c *gin.Context) {
 		utils.AbortWithStatusJSONFromError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, model.NewAuthenticationResponse(jwtToken))
+	c.JSON(http.StatusOK, model.NewAuthenticationResponse(jwtToken, "User successfully registered. AWS SES verification will be sent to your email address"))
 }

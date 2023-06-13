@@ -74,7 +74,7 @@ func (sc *SubcriptionController) Create(c *gin.Context) {
 
 // Send newsletter
 // @Summary Send a newsletter
-// @Description Send a newsletter to all subscribers
+// @Description Send a newsletter email to all subscribers
 // @ID send-newsletter
 // @Security Bearer
 // @Accept  json
@@ -108,7 +108,7 @@ func (sc *SubcriptionController) Send(c *gin.Context) {
 
 // Subscribe to a newsletter
 // @Summary Subscribe to a newsletter
-// @Description Subscribe to a newsletter with a given subscription ID
+// @Description Subscribe to a newsletter with a given subscription ID (confirmation email with unsubscribe link will be sent to newly subscribed user)
 // @ID subscribe-newsletter
 // @Produce  json
 // @Param subscriptionID path string true "Subscription ID"
