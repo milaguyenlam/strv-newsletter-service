@@ -46,6 +46,8 @@ import (
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 
+const gracefulShutdownTimeout = 5 * time.Second
+
 func main() {
 	cfg, err := config.LoadConfig()
 	if err != nil {
@@ -57,13 +59,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Opening database: %v", err)
 	}
+	// Create User table defined in model.User
 	err = db.AutoMigrate(&model.User{})
 	if err != nil {
 		log.Fatalf("Database migration failed: %v", err)
 	}
 
 	// Create a Firebase App
-	opt := option.WithCredentialsFile(cfg.FirebaseCredentialsFile)
+	opt := option.WithCredentialsJSON(cfg.FirebaseJSON)
 	firebaseApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		log.Fatalf("Initializing Firebase app: %v", err)
@@ -87,9 +90,10 @@ func main() {
 	subscriptionRepository := repository.NewSubscriptionRepository(firestoreClient)
 
 	// Create services
-	userService := service.NewUserService(userRepository, ses)
+	userService := service.NewUserService(userRepository, ses, cfg.JWTSecret)
 	subscriptionService := service.NewSubscriptionService(subscriptionRepository, ses)
 
+	// Create controllers
 	userController := api.NewUserController(userService)
 	subscriptionController := api.NewSubscriptionController(subscriptionService, userService)
 
@@ -113,11 +117,11 @@ func main() {
 
 	log.Println("Gracefully shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown: ", err)
 	}
 
-	log.Println("Server exiting")
+	log.Println("Server shut down.")
 }

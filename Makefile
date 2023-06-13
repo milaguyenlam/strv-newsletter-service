@@ -10,10 +10,10 @@ run:
 	go run main.go
 
 docker-build:
-	docker build -t myapp .
+	docker build -t app .
 
 docker-run:
-	docker run -p 8080:8080 myapp
+	docker run -p 8080:8080 app
 
 update-docs:
 	swag init

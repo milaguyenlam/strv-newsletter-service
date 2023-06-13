@@ -1,48 +1,25 @@
 package config
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	ServerPort              int
-	DatabaseDSN             string
-	AwsRegion               string
-	FirebaseCredentialsFile string
-	JWTSecret               string
+	ServerPort   int    `mapstructure:"SERVER_PORT"`
+	DatabaseDSN  string `mapstructure:"DATABASE_DSN"`
+	AwsRegion    string `mapstructure:"AWS_REGION"`
+	JWTSecret    string `mapstructure:"JWT_SECRET"`
+	FirebaseJSON []byte `mapstructure:"FIREBASE_JSON"`
 }
 
-func LoadConfig() (Config, error) {
+func LoadConfig() (*Config, error) {
 	viper.AutomaticEnv()
-	viper.SetEnvPrefix("APP")
-
 	var config Config
+	if err := viper.Unmarshal(&config); err != nil {
+		return nil, fmt.Errorf("Loading config from env: %w", err)
 
-	// Define all required keys
-	requiredKeys := []string{
-		"SERVER_PORT",
-		"DATABASE_DSN",
-		"AWS_REGION",
-		"FIREBASE_CREDENTIALS_FILE",
-		"JWT_SECRET",
 	}
-
-	// Check all required keys
-	for _, key := range requiredKeys {
-		viper.BindEnv(key)
-
-		if !viper.IsSet(key) {
-			return Config{}, errors.New("required key " + key + " missing value")
-		}
-	}
-
-	config.ServerPort = viper.GetInt("SERVER_PORT")
-	config.DatabaseDSN = viper.GetString("DATABASE_DSN")
-	config.AwsRegion = viper.GetString("AWS_REGION")
-	config.FirebaseCredentialsFile = viper.GetString("FIREBASE_CREDENTIALS_FILE")
-	config.JWTSecret = viper.GetString("JWT_SECRET")
-
-	return config, nil
+	return &config, nil
 }

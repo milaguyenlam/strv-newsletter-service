@@ -7,14 +7,19 @@ import (
 	"strv.com/newsletter/model"
 )
 
+// SubscriptionRepository is a struct that allows interaction with the Firestore database to manage subscriptions.
+// It embeds FirebaseRepository which contains a Firestore client.
 type SubscriptionRepository struct {
-	client *firestore.Client
+	FirebaseRepository // This embedded struct contains the Firestore client
 }
 
+// NewSubscriptionRepository creates a new SubscriptionRepository with the provided firestore client.
 func NewSubscriptionRepository(client *firestore.Client) *SubscriptionRepository {
-	return &SubscriptionRepository{client: client}
+	return &SubscriptionRepository{FirebaseRepository: FirebaseRepository{client: client}}
 }
 
+// Create adds a new subscription to the Firestore database.
+// It returns the ID of the created subscription and any error encountered during the operation.
 func (sr *SubscriptionRepository) Create(ctx context.Context, subscription *model.Subscription) (string, error) {
 	subscriptionID := subscription.GetID()
 	_, err := sr.client.Collection("subscriptions").Doc(subscriptionID).Create(ctx, subscription)
@@ -24,17 +29,21 @@ func (sr *SubscriptionRepository) Create(ctx context.Context, subscription *mode
 	return subscriptionID, nil
 }
 
-func (sr *SubscriptionRepository) Set(ctx context.Context, documentId string, subscription *model.Subscription) error {
-	_, err := sr.client.Collection("subscriptions").Doc(documentId).Set(ctx, subscription)
+// Set updates an existing subscription in the Firestore database.
+// It returns any error encountered during the operation.
+func (sr *SubscriptionRepository) Set(ctx context.Context, subscription *model.Subscription) error {
+	_, err := sr.client.Collection("subscriptions").Doc(subscription.GetID()).Set(ctx, subscription)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (sr *SubscriptionRepository) Get(ctx context.Context, documentId string) (*model.Subscription, error) {
+// Get retrieves a subscription from the Firestore database by its documentId.
+// It returns a pointer to the retrieved Subscription and any error encountered during the operation.
+func (sr *SubscriptionRepository) Get(ctx context.Context, documentID string) (*model.Subscription, error) {
 	subscription := &model.Subscription{}
-	snapshot, err := sr.client.Collection("subscriptions").Doc(documentId).Get(ctx)
+	snapshot, err := sr.client.Collection("subscriptions").Doc(documentID).Get(ctx)
 	if err != nil {
 		return nil, err
 	}

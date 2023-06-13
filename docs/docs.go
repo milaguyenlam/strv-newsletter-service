@@ -42,26 +42,26 @@ const docTemplate = `{
                 "operationId": "create-subscription",
                 "parameters": [
                     {
-                        "description": "subscription input",
+                        "description": "Subscription input",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.CreateSubscriptionInput"
+                            "$ref": "#/definitions/model.CreateSubscriptionInput"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "subscriptionId",
+                        "description": "Subscription ID",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/model.MessageResponse"
                         }
                     },
                     "500": {
                         "description": "Error message",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/model.MessageResponse"
                         }
                     }
                 }
@@ -105,13 +105,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Message",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/model.MessageResponse"
                         }
                     },
                     "500": {
                         "description": "Error message",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/model.MessageResponse"
                         }
                     }
                 }
@@ -145,13 +145,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Message",
                         "schema": {
-                            "$ref": "#/definitions/api.MessageResponse"
+                            "$ref": "#/definitions/model.MessageResponse"
                         }
                     },
                     "500": {
                         "description": "Error message",
                         "schema": {
-                            "$ref": "#/definitions/api.MessageResponse"
+                            "$ref": "#/definitions/model.MessageResponse"
                         }
                     }
                 }
@@ -185,13 +185,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Message",
                         "schema": {
-                            "$ref": "#/definitions/api.MessageResponse"
+                            "$ref": "#/definitions/model.MessageResponse"
                         }
                     },
                     "500": {
                         "description": "Error message",
                         "schema": {
-                            "$ref": "#/definitions/api.MessageResponse"
+                            "$ref": "#/definitions/model.MessageResponse"
                         }
                     }
                 }
@@ -215,7 +215,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.AuthenticationInput"
+                            "$ref": "#/definitions/model.AuthenticationInput"
                         }
                     }
                 ],
@@ -223,13 +223,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Token",
                         "schema": {
-                            "$ref": "#/definitions/api.AuthenticationResponse"
+                            "$ref": "#/definitions/model.AuthenticationResponse"
                         }
                     },
                     "401": {
                         "description": "Message",
                         "schema": {
-                            "$ref": "#/definitions/api.MessageResponse"
+                            "$ref": "#/definitions/model.MessageResponse"
                         }
                     }
                 }
@@ -253,7 +253,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.AuthenticationInput"
+                            "$ref": "#/definitions/model.AuthenticationInput"
                         }
                     }
                 ],
@@ -261,13 +261,13 @@ const docTemplate = `{
                     "200": {
                         "description": "Token",
                         "schema": {
-                            "$ref": "#/definitions/api.AuthenticationResponse"
+                            "$ref": "#/definitions/model.AuthenticationResponse"
                         }
                     },
                     "401": {
                         "description": "Message",
                         "schema": {
-                            "$ref": "#/definitions/api.MessageResponse"
+                            "$ref": "#/definitions/model.MessageResponse"
                         }
                     }
                 }
@@ -275,7 +275,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "api.AuthenticationInput": {
+        "model.AuthenticationInput": {
             "type": "object",
             "properties": {
                 "email": {
@@ -286,7 +286,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api.AuthenticationResponse": {
+        "model.AuthenticationResponse": {
             "type": "object",
             "properties": {
                 "token": {
@@ -294,21 +294,13 @@ const docTemplate = `{
                 }
             }
         },
-        "api.CreateSubscriptionInput": {
+        "model.CreateSubscriptionInput": {
             "type": "object",
             "properties": {
                 "description": {
                     "type": "string"
                 },
                 "subscriptionName": {
-                    "type": "string"
-                }
-            }
-        },
-        "api.MessageResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
                     "type": "string"
                 }
             }
@@ -320,6 +312,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "subject": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.MessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }

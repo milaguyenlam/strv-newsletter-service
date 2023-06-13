@@ -1,26 +1,21 @@
 definitions:
-  api.AuthenticationInput:
+  model.AuthenticationInput:
     properties:
       email:
         type: string
       password:
         type: string
     type: object
-  api.AuthenticationResponse:
+  model.AuthenticationResponse:
     properties:
       token:
         type: string
     type: object
-  api.CreateSubscriptionInput:
+  model.CreateSubscriptionInput:
     properties:
       description:
         type: string
       subscriptionName:
-        type: string
-    type: object
-  api.MessageResponse:
-    properties:
-      message:
         type: string
     type: object
   model.Email:
@@ -28,6 +23,11 @@ definitions:
       body:
         type: string
       subject:
+        type: string
+    type: object
+  model.MessageResponse:
+    properties:
+      message:
         type: string
     type: object
 externalDocs:
@@ -70,11 +70,11 @@ paths:
         "200":
           description: Message
           schema:
-            type: string
+            $ref: '#/definitions/model.MessageResponse'
         "500":
           description: Error message
           schema:
-            type: string
+            $ref: '#/definitions/model.MessageResponse'
       security:
       - Bearer: []
       summary: Send a newsletter
@@ -99,11 +99,11 @@ paths:
         "200":
           description: Message
           schema:
-            $ref: '#/definitions/api.MessageResponse'
+            $ref: '#/definitions/model.MessageResponse'
         "500":
           description: Error message
           schema:
-            $ref: '#/definitions/api.MessageResponse'
+            $ref: '#/definitions/model.MessageResponse'
       summary: Subscribe to a newsletter
   /subscription/{subscriptionID}/unsubscribe:
     get:
@@ -126,11 +126,11 @@ paths:
         "200":
           description: Message
           schema:
-            $ref: '#/definitions/api.MessageResponse'
+            $ref: '#/definitions/model.MessageResponse'
         "500":
           description: Error message
           schema:
-            $ref: '#/definitions/api.MessageResponse'
+            $ref: '#/definitions/model.MessageResponse'
       summary: Unsubscribe from a newsletter
   /subscription/create:
     post:
@@ -139,23 +139,23 @@ paths:
       description: Create a new subscription with the given name and description
       operationId: create-subscription
       parameters:
-      - description: subscription input
+      - description: Subscription input
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.CreateSubscriptionInput'
+          $ref: '#/definitions/model.CreateSubscriptionInput'
       produces:
       - application/json
       responses:
         "200":
-          description: subscriptionId
+          description: Subscription ID
           schema:
-            type: string
+            $ref: '#/definitions/model.MessageResponse'
         "500":
           description: Error message
           schema:
-            type: string
+            $ref: '#/definitions/model.MessageResponse'
       security:
       - Bearer: []
       summary: Create a new subscription
@@ -171,18 +171,18 @@ paths:
         name: authInput
         required: true
         schema:
-          $ref: '#/definitions/api.AuthenticationInput'
+          $ref: '#/definitions/model.AuthenticationInput'
       produces:
       - application/json
       responses:
         "200":
           description: Token
           schema:
-            $ref: '#/definitions/api.AuthenticationResponse'
+            $ref: '#/definitions/model.AuthenticationResponse'
         "401":
           description: Message
           schema:
-            $ref: '#/definitions/api.MessageResponse'
+            $ref: '#/definitions/model.MessageResponse'
       summary: User Login
   /user/register:
     post:
@@ -196,18 +196,18 @@ paths:
         name: authInput
         required: true
         schema:
-          $ref: '#/definitions/api.AuthenticationInput'
+          $ref: '#/definitions/model.AuthenticationInput'
       produces:
       - application/json
       responses:
         "200":
           description: Token
           schema:
-            $ref: '#/definitions/api.AuthenticationResponse'
+            $ref: '#/definitions/model.AuthenticationResponse'
         "401":
           description: Message
           schema:
-            $ref: '#/definitions/api.MessageResponse'
+            $ref: '#/definitions/model.MessageResponse'
       summary: User Registration
 securityDefinitions:
   Bearer:

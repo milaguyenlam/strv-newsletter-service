@@ -1,6 +1,6 @@
 package model
 
 type Email struct {
-	Subject string
-	Body    string
+	Subject string `json:"subject"`
+	Body    string `json:"body"`
 }

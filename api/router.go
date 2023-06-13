@@ -9,18 +9,19 @@ import (
 	"strv.com/newsletter/docs"
 )
 
-const BasePath = "/api/v1"
-const TimeoutPeriod = 10 * time.Second //10s
+const basePath = "/api/v1"
+const timeoutPeriod = 10 * time.Second //10s
 
+// SetupRoutes is a function to setup all routes for the application.
+// It takes gin engine instance, userController and subscriptionController as arguments.
 func SetupRoutes(app *gin.Engine, userController *UserController, subscriptionController *SubcriptionController) {
-	masterRouter := app.Group(BasePath)
-	setupSwagger(app)
-	userController.RegisterUserRouter(masterRouter)
-	subscriptionController.RegisterSubscriptionRouter(masterRouter)
-
+	masterRouter := app.Group(basePath)
+	setupSwagger(app)                                               // setup Swagger UI
+	userController.RegisterUserRouter(masterRouter)                 // register user routes
+	subscriptionController.RegisterSubscriptionRouter(masterRouter) // register subscription routes
 }
 
 func setupSwagger(app *gin.Engine) {
-	docs.SwaggerInfo.BasePath = BasePath
+	docs.SwaggerInfo.BasePath = basePath
 	app.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

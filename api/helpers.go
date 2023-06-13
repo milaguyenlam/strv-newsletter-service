@@ -8,10 +8,6 @@ import (
 	"strv.com/newsletter/model"
 )
 
-type MessageResponse struct {
-	Message string
-}
-
 func getCurrentUser(c *gin.Context) (*model.User, error) {
 	userValue, exists := c.Get(middleware.UserContextKey)
 	if !exists {
@@ -22,8 +18,4 @@ func getCurrentUser(c *gin.Context) (*model.User, error) {
 		return nil, fmt.Errorf("Getting current user from gin context failed (type assertion failed): %v", c.Request.Header["Authorization"])
 	}
 	return user, nil
-}
-
-func createMessageResponse(message string) gin.H {
-	return gin.H{"message": message}
 }
