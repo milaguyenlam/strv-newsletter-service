@@ -48,20 +48,12 @@ func (us *UserService) Login(ctx context.Context, email string, password string)
 		return "", model.NewCustomError(http.StatusUnauthorized, fmt.Sprintf("Incorrect password"))
 	}
 
-	// Create a new JWT token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": email,
-		"exp":   time.Now().Add(time.Hour * 72).Unix(),
-	})
-
-	// Sign the token with the secret
-	tokenString, err := token.SignedString([]byte(us.jwtSecret))
-	if err != nil {
-		log.Println(err)
-		return "", model.NewCustomError(http.StatusInternalServerError, "Error occured while signing token")
+	token, customErr := us.generateJWT(email)
+	if customErr != nil {
+		return "", customErr
 	}
 
-	return tokenString, nil
+	return token, nil
 }
 
 // Register creates a new user with the provided email and password, verifies the email, and returns a JWT token
@@ -74,27 +66,26 @@ func (us *UserService) Register(ctx context.Context, email string, password stri
 	}
 
 	// Verify the email address with Amazon SES
-	input := &ses.VerifyEmailAddressInput{
+	input := &ses.VerifyEmailIdentityInput{
 		EmailAddress: aws.String(email),
 	}
-	_, err = us.svc.VerifyEmailAddress(input)
+	_, err = us.svc.VerifyEmailIdentityWithContext(ctx, input)
 	if err != nil {
 		log.Println(err)
 		return "", model.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("Error occured while verifying %s with AWS SES", email))
 	}
 
 	// Log the user in to get a JWT token
-	token, err := us.Login(ctx, email, password)
+	token, customErr := us.generateJWT(email)
 	if err != nil {
-		log.Println(err)
-		return "", model.NewCustomError(http.StatusInternalServerError, fmt.Sprintf("Error occured while logging in user %s", email))
+		return "", customErr
 	}
 
 	return token, nil
 }
 
-// GetByEmail retrieves a user by their email address
-func (us *UserService) GetByEmail(ctx context.Context, email string) (*model.User, *model.CustomError) {
+// getByEmail retrieves a user by their email address
+func (us *UserService) getByEmail(ctx context.Context, email string) (*model.User, *model.CustomError) {
 	user, err := us.ur.GetByEmail(ctx, email)
 
 	if err != nil {
@@ -103,6 +94,22 @@ func (us *UserService) GetByEmail(ctx context.Context, email string) (*model.Use
 	}
 
 	return user, nil
+}
+
+func (us *UserService) generateJWT(email string) (string, *model.CustomError) {
+	// Create a new JWT token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": email,
+		"exp":   time.Now().Add(time.Hour * 72).Unix(),
+	})
+
+	// Sign the token with the secret
+	tokenString, err := token.SignedString([]byte(us.jwtSecret))
+	if err != nil {
+		log.Println(err)
+		return "", model.NewCustomError(http.StatusInternalServerError, "Error occured while generating authorization token")
+	}
+	return tokenString, nil
 }
 
 // VerifyToken verifies a JWT token and returns the associated user
@@ -130,7 +137,7 @@ func (us *UserService) VerifyToken(ctx context.Context, token string) (*model.Us
 		return nil, model.NewCustomError(http.StatusUnauthorized, "Invalid token")
 	}
 
-	user, customErr := us.GetByEmail(ctx, claims["email"].(string))
+	user, customErr := us.getByEmail(ctx, claims["email"].(string))
 
 	if customErr != nil {
 		return nil, customErr
